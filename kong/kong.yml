@@ -1,0 +1,146 @@
+# Kong Gateway en modo DB-less (declarativo).
+# Sin API keys: la auth es JWT (plugin jwt). El login lo firma auth-service con JWT_SECRET.
+# IMPORTANTE: el secret de abajo debe ser idéntico a JWT_SECRET del auth-service.
+_format_version: "3.0"
+
+consumers:
+  - username: admin
+  - username: user
+
+jwt_secrets:
+  - consumer: admin
+    key: admin-issuer
+    algorithm: HS256
+    secret: change-me-super-secret-for-demo-min-32-chars!!
+  - consumer: user
+    key: user-issuer
+    algorithm: HS256
+    secret: change-me-super-secret-for-demo-min-32-chars!!
+
+services:
+  - name: product-service
+    url: http://product-service:3001
+    routes:
+      - name: products-api
+        paths: [/api/products]
+        strip_path: true
+        preserve_host: false
+    plugins:
+      - name: jwt
+        config:
+          claims_to_verify: [exp]
+          run_on_preflight: false
+      - name: rate-limiting
+        config:
+          minute: 10
+          policy: local
+          limit_by: ip
+          fault_tolerant: true
+          hide_client_headers: false
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - x-gateway:kong
+
+  - name: order-service
+    url: http://order-service:3002
+    routes:
+      - name: orders-api
+        paths: [/api/orders]
+        strip_path: true
+        preserve_host: false
+    plugins:
+      - name: jwt
+        config:
+          claims_to_verify: [exp]
+          run_on_preflight: false
+      - name: rate-limiting
+        config:
+          minute: 10
+          policy: local
+          limit_by: ip
+          fault_tolerant: true
+          hide_client_headers: false
+
+  - name: customer-service
+    url: http://customer-service:3003
+    routes:
+      - name: customers-api
+        paths: [/api/customers]
+        strip_path: true
+        preserve_host: false
+    plugins:
+      - name: jwt
+        config:
+          claims_to_verify: [exp]
+          run_on_preflight: false
+      - name: rate-limiting
+        config:
+          minute: 10
+          policy: local
+          limit_by: ip
+          fault_tolerant: true
+          hide_client_headers: false
+
+  - name: auth-service
+    url: http://auth-service:3004
+    routes:
+      # Login público con límite estricto (5/min). Sin plugin jwt.
+      - name: auth-login
+        paths: [/auth/login]
+        strip_path: false
+        methods: [POST]
+      # Salud agregada: exige JWT igual que el resto de /api/**
+      - name: aggregated-health
+        paths: [/api/health/services]
+        strip_path: false
+        methods: [GET]
+      # Health del gateway lógico (público)
+      - name: gateway-health
+        paths: [/health]
+        strip_path: false
+        methods: [GET]
+    plugins:
+      - name: rate-limiting
+        route: auth-login
+        config:
+          minute: 5
+          policy: local
+          limit_by: ip
+          fault_tolerant: true
+          hide_client_headers: false
+      - name: jwt
+        route: aggregated-health
+        config:
+          claims_to_verify: [exp]
+          run_on_preflight: false
+      - name: rate-limiting
+        route: aggregated-health
+        config:
+          minute: 10
+          policy: local
+          limit_by: ip
+          fault_tolerant: true
+          hide_client_headers: false
+
+plugins:
+  # Trazabilidad: genera/propaga x-request-id hacia los microservicios
+  - name: correlation-id
+    config:
+      header_name: x-request-id
+      generator: uuid
+      echo_downstream: true
+  # Logging de cada petición a stdout (método, ruta, status, duración, servicio destino)
+  - name: file-log
+    config:
+      path: /dev/stdout
+      reopen: true
+  - name: cors
+    config:
+      origins: ["*"]
+      methods: [GET, POST, PUT, PATCH, DELETE, OPTIONS]
+      headers: [Authorization, Content-Type, x-request-id]
+      exposed_headers: [x-request-id, Retry-After]
+      credentials: false
+      max_age: 3600

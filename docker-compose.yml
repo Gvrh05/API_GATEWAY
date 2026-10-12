@@ -1,0 +1,118 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  product-service:
+    build: ./product-service
+    environment:
+      PORT: 3001
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: products
+      DB_SYNCHRONIZE: "true"
+      SEED_ON_START: "true"
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: npm run start:dev
+
+  order-service:
+    build: ./order-service
+    environment:
+      PORT: 3002
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: orders
+      DB_SYNCHRONIZE: "true"
+      SEED_ON_START: "true"
+      VALIDATE_REFS: "false"
+      CUSTOMER_SERVICE_URL: http://customer-service:3003
+      PRODUCT_SERVICE_URL: http://product-service:3001
+    ports:
+      - "3002:3002"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: npm run start:dev
+
+  customer-service:
+    build: ./customer-service
+    environment:
+      PORT: 3003
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: customers
+      DB_SYNCHRONIZE: "true"
+      SEED_ON_START: "true"
+    ports:
+      - "3003:3003"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: npm run start:dev
+
+  auth-service:
+    build: ./auth-service
+    environment:
+      PORT: 3004
+      JWT_SECRET: change-me-super-secret-for-demo-min-32-chars!!
+      JWT_EXPIRES_IN: 1h
+      AUTH_USERS: "admin:admin123:admin,user:user123:user"
+      JWT_ISS_ADMIN: admin-issuer
+      JWT_ISS_USER: user-issuer
+      PRODUCT_SERVICE_URL: http://product-service:3001
+      ORDER_SERVICE_URL: http://order-service:3002
+      CUSTOMER_SERVICE_URL: http://customer-service:3003
+    ports:
+      - "3004:3004"
+    depends_on:
+      - product-service
+      - order-service
+      - customer-service
+    command: npm run start:dev
+
+  kong:
+    image: kong:3.7
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /kong/kong.yml
+      KONG_PROXY_LISTEN: 0.0.0.0:8000
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001
+      KONG_LOG_LEVEL: notice
+      KONG_NGINX_WORKER_PROCESSES: "1"
+    volumes:
+      - ./kong/kong.yml:/kong/kong.yml:ro
+    ports:
+      # Puerto público del gateway: 3000 (respeta el MD, Kong escucha 8000 dentro)
+      - "3000:8000"
+      - "8001:8001"
+    depends_on:
+      - product-service
+      - order-service
+      - customer-service
+      - auth-service
+
+volumes:
+  pgdata:
