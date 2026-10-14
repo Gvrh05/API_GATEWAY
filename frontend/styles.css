@@ -1,0 +1,16 @@
+body { font-family: system-ui, sans-serif; margin: 0; background: #f4f6f8; color: #222; }
+header { display: flex; justify-content: space-between; align-items: center; background: #1a1a2e; color: #fff; padding: 12px 20px; }
+.card { background: #fff; max-width: 420px; margin: 24px auto; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+.card input { display: block; width: 100%; margin: 8px 0; padding: 10px; }
+button { background: #16213e; color: #fff; border: 0; padding: 9px 14px; border-radius: 6px; cursor: pointer; }
+button:hover { opacity: .9; }
+.hint { color: #666; font-size: 13px; }
+main { max-width: 1000px; margin: 0 auto; padding: 16px; }
+.tabs button { margin-right: 8px; }
+.tabs button.active { background: #0f3460; }
+table { width: 100%; border-collapse: collapse; background: #fff; margin-top: 12px; }
+th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 14px; }
+.form { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+.form input { padding: 8px; }
+#status { color: #0f3460; }
+pre { background: #111; color: #0f0; padding: 12px; border-radius: 8px; overflow: auto; }

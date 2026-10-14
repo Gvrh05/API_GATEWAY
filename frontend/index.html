@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tienda - Frontend</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<header>
+  <h1>Tienda de tecnología</h1>
+  <div id="userbox">
+    <span id="who">Sin sesión</span>
+    <button id="btn-logout" hidden>Salir</button>
+  </div>
+</header>
+
+<section id="login-card" class="card">
+  <h2>Ingresar</h2>
+  <p class="hint">Demo: admin / admin123 &nbsp;·&nbsp; user / user123</p>
+  <input id="in-user" placeholder="usuario" value="admin" />
+  <input id="in-pass" type="password" placeholder="contraseña" value="admin123" />
+  <button id="btn-login">Entrar</button>
+  <p id="login-msg"></p>
+</section>
+
+<main id="app" hidden>
+  <div class="tabs">
+    <button data-tab="productos" class="active">Productos</button>
+    <button data-tab="clientes">Clientes</button>
+    <button data-tab="pedidos">Pedidos</button>
+    <button id="btn-health">Salud</button>
+  </div>
+  <p id="status"></p>
+  <section id="tab-productos" class="tab">
+    <h3>Productos <button id="btn-reload-products">Recargar</button></h3>
+    <div class="form">
+      <input id="p-name" placeholder="nombre" />
+      <input id="p-price" type="number" step="0.01" placeholder="precio" />
+      <input id="p-stock" type="number" placeholder="stock" />
+      <button id="btn-create-product">Crear</button>
+    </div>
+    <table><thead><tr><th>ID</th><th>Nombre</th><th>Precio</th><th>Stock</th></tr></thead>
+    <tbody id="tb-products"></tbody></table>
+  </section>
+  <section id="tab-clientes" class="tab" hidden>
+    <h3>Clientes <button id="btn-reload-customers">Recargar</button></h3>
+    <div class="form">
+      <input id="c-name" placeholder="nombre" />
+      <input id="c-email" placeholder="email" />
+      <button id="btn-create-customer">Crear</button>
+    </div>
+    <table><thead><tr><th>ID</th><th>Nombre</th><th>Email</th></tr></thead>
+    <tbody id="tb-customers"></tbody></table>
+  </section>
+  <section id="tab-pedidos" class="tab" hidden>
+    <h3>Pedidos <button id="btn-reload-orders">Recargar</button></h3>
+    <div class="form">
+      <input id="o-customer" type="number" placeholder="customerId (ej. 1)" />
+      <input id="o-product" type="number" placeholder="productId (ej. 2)" />
+      <input id="o-qty" type="number" value="1" />
+      <input id="o-price" type="number" step="0.01" placeholder="precio unit." />
+      <button id="btn-create-order">Crear pedido</button>
+    </div>
+    <table><thead><tr><th>ID</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead>
+    <tbody id="tb-orders"></tbody></table>
+  </section>
+  <pre id="health-out"></pre>
+</main>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
