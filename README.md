@@ -16,6 +16,7 @@ docker compose up --build -d
 docker compose ps
 docker compose logs -f kong auth-service
 ```
+O usa los scripts incluidos (hacen lo mismo + muestran URLs): `.\start.bat` o `powershell -ExecutionPolicy Bypass -File .\start.ps1`.
 
 ## Puertos y credenciales (usa `http://127.0.0.1`, no `localhost`)
 | Qué | URL | Credenciales |
