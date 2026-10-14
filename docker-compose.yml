@@ -85,6 +85,11 @@ services:
       PRODUCT_SERVICE_URL: http://product-service:3001
       ORDER_SERVICE_URL: http://order-service:3002
       CUSTOMER_SERVICE_URL: http://customer-service:3003
+      ANALYTICS_DB_HOST: postgres
+      ANALYTICS_DB_PORT: 5432
+      ANALYTICS_DB_USER: postgres
+      ANALYTICS_DB_PASSWORD: postgres
+      ANALYTICS_DB_NAME: postgres
     ports:
       - "3004:3004"
     depends_on:
@@ -114,5 +119,27 @@ services:
       - customer-service
       - auth-service
 
+  frontend:
+    build: ./frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - kong
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana-storage:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    ports:
+      - "3005:3000"
+    depends_on:
+      - postgres
+
 volumes:
   pgdata:
+  grafana-storage:

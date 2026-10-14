@@ -1,0 +1,66 @@
+{
+  "title": "Plataforma - Accesos y Negocio",
+  "uid": "plataforma-accesos",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "time": { "from": "now-14d", "to": "now" },
+  "panels": [
+    {
+      "id": 1, "title": "Accesos por dia", "type": "timeseries",
+      "datasource": { "type": "postgres", "uid": "PD_ANALYTICS" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [{ "refId": "A", "format": "time_series",
+        "rawSql": "SELECT $__timeGroup(created_at,'1d'), COUNT(*) AS accesos FROM access_log WHERE $__timeFilter(created_at) GROUP BY 1 ORDER BY 1" }]
+    },
+    {
+      "id": 2, "title": "Logins por usuario", "type": "barchart",
+      "datasource": { "type": "postgres", "uid": "PD_ANALYTICS" },
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 0 },
+      "targets": [{ "refId": "A", "format": "table",
+        "rawSql": "SELECT username, COUNT(*) AS logins FROM access_log WHERE action='login' AND $__timeFilter(created_at) GROUP BY 1 ORDER BY 2 DESC" }]
+    },
+    {
+      "id": 3, "title": "Acciones por tipo", "type": "piechart",
+      "datasource": { "type": "postgres", "uid": "PD_ANALYTICS" },
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 0 },
+      "targets": [{ "refId": "A", "format": "table",
+        "rawSql": "SELECT action, COUNT(*) AS total FROM access_log WHERE $__timeFilter(created_at) GROUP BY 1 ORDER BY 2 DESC" }]
+    },
+    {
+      "id": 4, "title": "Top rutas", "type": "table",
+      "datasource": { "type": "postgres", "uid": "PD_ANALYTICS" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [{ "refId": "A", "format": "table",
+        "rawSql": "SELECT route, COUNT(*) AS visitas FROM access_log WHERE $__timeFilter(created_at) GROUP BY 1 ORDER BY 2 DESC LIMIT 10" }]
+    },
+    {
+      "id": 5, "title": "Ventas por dia (S/)", "type": "timeseries",
+      "datasource": { "type": "postgres", "uid": "PD_ORDERS" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [{ "refId": "A", "format": "time_series",
+        "rawSql": "SELECT $__timeGroup(\"createdAt\",'1d'), SUM(total)::float AS ventas FROM orders WHERE $__timeFilter(\"createdAt\") AND status != 'CANCELLED' GROUP BY 1 ORDER BY 1" }]
+    },
+    {
+      "id": 6, "title": "Pedidos por estado", "type": "piechart",
+      "datasource": { "type": "postgres", "uid": "PD_ORDERS" },
+      "gridPos": { "h": 8, "w": 6, "x": 0, "y": 16 },
+      "targets": [{ "refId": "A", "format": "table",
+        "rawSql": "SELECT status, COUNT(*) AS n, ROUND(AVG(total)::numeric,2)::float AS ticket_prom FROM orders GROUP BY 1" }]
+    },
+    {
+      "id": 7, "title": "Top clientes por gasto (customerId)", "type": "barchart",
+      "datasource": { "type": "postgres", "uid": "PD_ORDERS" },
+      "gridPos": { "h": 8, "w": 6, "x": 6, "y": 16 },
+      "targets": [{ "refId": "A", "format": "table",
+        "rawSql": "SELECT \"customerId\"::text AS cliente, SUM(total)::float AS gasto FROM orders WHERE status != 'CANCELLED' GROUP BY 1 ORDER BY 2 DESC LIMIT 5" }]
+    },
+    {
+      "id": 8, "title": "Stock critico (<50)", "type": "table",
+      "datasource": { "type": "postgres", "uid": "PD_PRODUCTS" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "targets": [{ "refId": "A", "format": "table",
+        "rawSql": "SELECT id, name, stock, price::float FROM products WHERE stock < 50 ORDER BY stock ASC" }]
+    }
+  ]
+}

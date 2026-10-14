@@ -1,0 +1,60 @@
+apiVersion: 1
+datasources:
+  - name: postgres-analytics
+    uid: PD_ANALYTICS
+    type: postgres
+    access: proxy
+    url: postgres:5432
+    database: postgres
+    user: postgres
+    secureJsonData:
+      password: postgres
+    jsonData:
+      sslmode: disable
+      maxOpenConns: 10
+      postgresVersion: 1600
+      timescaledb: false
+    isDefault: true
+    editable: true
+  - name: postgres-products
+    uid: PD_PRODUCTS
+    type: postgres
+    access: proxy
+    url: postgres:5432
+    database: products
+    user: postgres
+    secureJsonData:
+      password: postgres
+    jsonData:
+      sslmode: disable
+      maxOpenConns: 10
+      postgresVersion: 1600
+    editable: true
+  - name: postgres-orders
+    uid: PD_ORDERS
+    type: postgres
+    access: proxy
+    url: postgres:5432
+    database: orders
+    user: postgres
+    secureJsonData:
+      password: postgres
+    jsonData:
+      sslmode: disable
+      maxOpenConns: 10
+      postgresVersion: 1600
+    editable: true
+  - name: postgres-customers
+    uid: PD_CUSTOMERS
+    type: postgres
+    access: proxy
+    url: postgres:5432
+    database: customers
+    user: postgres
+    secureJsonData:
+      password: postgres
+    jsonData:
+      sslmode: disable
+      maxOpenConns: 10
+      postgresVersion: 1600
+    editable: true

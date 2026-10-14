@@ -96,6 +96,11 @@ services:
         paths: [/api/health/services]
         strip_path: false
         methods: [GET]
+      # Analytics público (beacon del frontend, fire-and-forget)
+      - name: analytics-track
+        paths: [/analytics]
+        strip_path: false
+        methods: [POST]
       # Health del gateway lógico (público)
       - name: gateway-health
         paths: [/health]
