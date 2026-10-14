@@ -32,4 +32,32 @@ export class AnalyticsService {
       this.logger.warn(`track failed: ${(e as Error).message}`);
     }
   }
+
+  /** Últimos eventos de auditoría, con filtros opcionales. Límite 1..200. */
+  async recent(limit: unknown = 50, action?: string, username?: string) {
+    if (!this.pool) return [];
+    const n = Math.min(Math.max(Number(limit) || 50, 1), 200);
+    const conds: string[] = [];
+    const params: unknown[] = [];
+    if (action) {
+      params.push(String(action).slice(0, 50));
+      conds.push(`action = $${params.length}`);
+    }
+    if (username) {
+      params.push(String(username).slice(0, 100));
+      conds.push(`username = $${params.length}`);
+    }
+    params.push(n);
+    const where = conds.length ? `WHERE ${conds.join(' AND ')}` : '';
+    try {
+      const { rows } = await this.pool.query(
+        `SELECT id, username, action, route, created_at AS "createdAt" FROM access_log ${where} ORDER BY id DESC LIMIT $${params.length}`,
+        params,
+      );
+      return rows;
+    } catch (e) {
+      this.logger.warn(`recent failed: ${(e as Error).message}`);
+      return [];
+    }
+  }
 }

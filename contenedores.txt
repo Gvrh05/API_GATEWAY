@@ -1,0 +1,44 @@
+API_GATEWAY - Imagenes y contenedores (14/10/2026)
+================================================
+
+COMANDOS EJECUTADOS (desde API_GATEWAY/):
+  docker compose up --build -d
+  docker compose ps
+  docker images --filter "reference=api_gateway*"
+
+IMAGENES CONSTRUIDAS:
+  api_gateway-auth-service:latest       (auth-service :3004)
+  api_gateway-customer-service:latest   (customer-service :3003)
+  api_gateway-frontend:latest           (frontend :8080)
+  api_gateway-order-service:latest      (order-service :3002)
+  api_gateway-product-service:latest    (product-service :3001)
+  + externas: postgres:16-alpine, kong:3.7, grafana/grafana:11.2.0
+
+CONTENEDORES (docker compose ps) - todos Up:
+  api_gateway-postgres-1           postgres:16-alpine           Up (healthy)  0.0.0.0:5432->5432
+  api_gateway-product-service-1    api_gateway-product-service   Up            0.0.0.0:3001->3001
+  api_gateway-order-service-1      api_gateway-order-service     Up            0.0.0.0:3002->3002
+  api_gateway-customer-service-1   api_gateway-customer-service  Up            0.0.0.0:3003->3003
+  api_gateway-auth-service-1       api_gateway-auth-service      Up            0.0.0.0:3004->3004
+  api_gateway-kong-1               kong:3.7                      Up            0.0.0.0:3000->8000, 0.0.0.0:8001->8001
+  api_gateway-frontend-1           api_gateway-frontend          Up            0.0.0.0:8080->80
+  api_gateway-grafana-1            grafana/grafana:11.2.0        Up            0.0.0.0:3005->3000
+
+URLS (usar http://127.0.0.1, no localhost):
+  Frontend : http://127.0.0.1:8080/ (admin/admin123, user/user123)
+  Kong     : http://127.0.0.1:3000/health
+  Grafana  : http://127.0.0.1:3005/ (admin/admin)
+  Swagger  : http://127.0.0.1:3001/docs/ :3002/docs/ :3003/docs/ :3004/docs/
+
+ARREGLOS APLICADOS PARA QUE ARRANCARA:
+  1. postgres-init/init-dbs.sh -> renombrado a 01-init-dbs.sh
+     (antes corria al ultimo por orden alfabetico y 03-spread-dates.sql
+     fallaba con 'database products does not exist' -> postgres exit 3).
+  2. Convertido 01-init-dbs.sh a finales LF (estaba CRLF, rompe /bin/sh).
+  3. Hecho tolerante 03-spread-dates.sql (bloques DO + to_regclass):
+     las tablas products/orders/customers las crea TypeORM despues del
+     init, asi que si no existen se omite sin tumbar postgres.
+     Luego se hizo: docker compose down -v + docker compose up --build -d.
+
+NOTA: para re-ejecutar dispersar fechas del negocio tras el seed, correr
+este UPDATE cuando los servicios ya esten Up (tablas ya creadas por TypeORM).

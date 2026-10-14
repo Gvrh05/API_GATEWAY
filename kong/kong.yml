@@ -101,6 +101,11 @@ services:
         paths: [/analytics]
         strip_path: false
         methods: [POST]
+      # Lectura de auditoría: exige JWT (solo la usa el panel admin)
+      - name: analytics-recent
+        paths: [/analytics/recent]
+        strip_path: false
+        methods: [GET]
       # Health del gateway lógico (público)
       - name: gateway-health
         paths: [/health]
@@ -122,6 +127,19 @@ services:
           run_on_preflight: false
       - name: rate-limiting
         route: aggregated-health
+        config:
+          minute: 10
+          policy: local
+          limit_by: ip
+          fault_tolerant: true
+          hide_client_headers: false
+      - name: jwt
+        route: analytics-recent
+        config:
+          claims_to_verify: [exp]
+          run_on_preflight: false
+      - name: rate-limiting
+        route: analytics-recent
         config:
           minute: 10
           policy: local

@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Get, Body, Query, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { AnalyticsService } from './analytics.service';
 
@@ -13,5 +13,15 @@ export class AnalyticsController {
   async track(@Body() body: { username?: string; action?: string; route?: string }) {
     await this.analytics.track(body?.username, body?.action, body?.route);
     return { ok: true };
+  }
+
+  @Get('analytics/recent')
+  @ApiOperation({ summary: 'Últimos eventos de auditoría (vía Kong exige JWT)' })
+  recent(
+    @Query('limit') limit?: string,
+    @Query('action') action?: string,
+    @Query('username') username?: string,
+  ) {
+    return this.analytics.recent(limit, action, username);
   }
 }
