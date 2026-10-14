@@ -1,0 +1,4 @@
+# Los scripts de init de postgres deben quedar SIEMPRE en LF:
+# con CRLF el contenedor falla (/bin/sh^M, exit 126).
+postgres-init/*.sh text eol=lf
+postgres-init/*.sql text eol=lf

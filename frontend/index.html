@@ -3,71 +3,180 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Tienda - Frontend</title>
-<link rel="stylesheet" href="styles.css" />
+<title>NovaStore · Panel API Gateway</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f46e5'/%3E%3Cpath d='M16 7l8 4.5v9L16 25l-8-4.5v-9z' fill='none' stroke='white' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="styles.css?v=2" />
 </head>
 <body>
-<header>
-  <h1>Tienda de tecnología</h1>
-  <div id="userbox">
-    <span id="who">Sin sesión</span>
-    <button id="btn-logout" hidden>Salir</button>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="logo" aria-hidden="true">
+      <svg viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="url(#g)"/><path d="M16 7l8 4.5v9L16 25l-8-4.5v-9z" fill="none" stroke="white" stroke-width="2" stroke-linejoin="round"/><defs><linearGradient id="g" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#4f46e5"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs></svg>
+    </span>
+    <span class="brand-text"><strong>NovaStore</strong><small>API Gateway · Panel de gestión</small></span>
+  </div>
+  <div id="userbox" class="userbox">
+    <span class="status-dot" title="Gateway"></span>
+    <span id="who" class="who">Sin sesión</span>
+    <span id="role-badge" class="role user" hidden></span>
+    <button id="btn-logout" class="btn ghost light" hidden>Salir</button>
   </div>
 </header>
 
-<section id="login-card" class="card">
-  <h2>Ingresar</h2>
-  <p class="hint">Demo: admin / admin123 &nbsp;·&nbsp; user / user123</p>
-  <input id="in-user" placeholder="usuario" value="admin" />
-  <input id="in-pass" type="password" placeholder="contraseña" value="admin123" />
-  <button id="btn-login">Entrar</button>
-  <p id="login-msg"></p>
+<section id="login-view" class="login-view">
+  <div id="login-card" class="card login-card">
+    <div class="login-badge">● Kong Gateway</div>
+    <h2>Bienvenido de nuevo</h2>
+    <p class="hint">Ingresa para gestionar productos, clientes y pedidos.</p>
+    <label class="field">Usuario
+      <input id="in-user" placeholder="admin" value="admin" autocomplete="username" />
+    </label>
+    <label class="field">Contraseña
+      <input id="in-pass" type="password" placeholder="••••••••" value="admin123" autocomplete="current-password" />
+    </label>
+    <button id="btn-login" class="btn primary block">Entrar al panel</button>
+    <p id="login-msg" class="msg"></p>
+    <div class="demo">
+      <span>Cuentas demo:</span>
+      <code>admin / admin123</code>
+      <code>user / user123</code>
+    </div>
+  </div>
 </section>
 
 <main id="app" hidden>
-  <div class="tabs">
+  <section class="stats">
+    <div class="stat" id="statcard-products">
+      <span class="stat-ico p">◈</span>
+      <span class="stat-body"><strong id="stat-products">–</strong><small>Productos</small></span>
+    </div>
+    <div class="stat" id="statcard-customers">
+      <span class="stat-ico c">◎</span>
+      <span class="stat-body"><strong id="stat-customers">–</strong><small>Clientes</small></span>
+    </div>
+    <div class="stat" id="statcard-orders">
+      <span class="stat-ico o">⬣</span>
+      <span class="stat-body"><strong id="stat-orders">–</strong><small>Pedidos</small></span>
+    </div>
+  </section>
+
+  <nav class="tabs">
     <button data-tab="productos" class="active">Productos</button>
     <button data-tab="clientes">Clientes</button>
     <button data-tab="pedidos">Pedidos</button>
-    <button id="btn-health">Salud</button>
-  </div>
-  <p id="status"></p>
-  <section id="tab-productos" class="tab">
-    <h3>Productos <button id="btn-reload-products">Recargar</button></h3>
-    <div class="form">
-      <input id="p-name" placeholder="nombre" />
-      <input id="p-price" type="number" step="0.01" placeholder="precio" />
-      <input id="p-stock" type="number" placeholder="stock" />
-      <button id="btn-create-product">Crear</button>
+    <button data-tab="auditoria">Auditoría</button>
+    <span class="tabs-sp"></span>
+    <button id="btn-health" class="health">❤ Salud del sistema</button>
+  </nav>
+  <p id="status" class="status"></p>
+
+  <section id="tab-productos" class="tab card panel">
+    <div class="panel-head">
+      <h3>Productos</h3>
+      <button id="btn-reload-products" class="btn small ghost">↻ Recargar</button>
     </div>
-    <table><thead><tr><th>ID</th><th>Nombre</th><th>Precio</th><th>Stock</th></tr></thead>
-    <tbody id="tb-products"></tbody></table>
-  </section>
-  <section id="tab-clientes" class="tab" hidden>
-    <h3>Clientes <button id="btn-reload-customers">Recargar</button></h3>
-    <div class="form">
-      <input id="c-name" placeholder="nombre" />
-      <input id="c-email" placeholder="email" />
-      <button id="btn-create-customer">Crear</button>
+    <div class="search-row">
+      <input id="q-products" class="search" placeholder="🔍 Buscar por ID o nombre…" autocomplete="off" />
+      <button id="btn-search-products" class="btn primary">Buscar</button>
     </div>
-    <table><thead><tr><th>ID</th><th>Nombre</th><th>Email</th></tr></thead>
-    <tbody id="tb-customers"></tbody></table>
-  </section>
-  <section id="tab-pedidos" class="tab" hidden>
-    <h3>Pedidos <button id="btn-reload-orders">Recargar</button></h3>
-    <div class="form">
-      <input id="o-customer" type="number" placeholder="customerId (ej. 1)" />
-      <input id="o-product" type="number" placeholder="productId (ej. 2)" />
-      <input id="o-qty" type="number" value="1" />
-      <input id="o-price" type="number" step="0.01" placeholder="precio unit." />
-      <button id="btn-create-order">Crear pedido</button>
+    <div class="form" id="form-product">
+      <label>Nombre<input id="p-name" placeholder="Ej. Laptop Pro" /></label>
+      <label>Precio<input id="p-price" type="number" step="0.01" min="0" placeholder="0.00" /></label>
+      <label>Stock<input id="p-stock" type="number" min="0" placeholder="0" /></label>
+      <button id="btn-create-product" class="btn primary">+ Crear producto</button>
     </div>
-    <table><thead><tr><th>ID</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead>
-    <tbody id="tb-orders"></tbody></table>
+    <div class="table-wrap"><table>
+      <thead><tr><th>ID</th><th>Nombre</th><th>Precio</th><th>Stock</th></tr></thead>
+      <tbody id="tb-products"></tbody>
+    </table></div>
   </section>
-  <pre id="health-out"></pre>
+
+  <section id="tab-clientes" class="tab card panel" hidden>
+    <div class="panel-head">
+      <h3>Clientes</h3>
+      <button id="btn-reload-customers" class="btn small ghost">↻ Recargar</button>
+    </div>
+    <div class="search-row">
+      <input id="q-customers" class="search" placeholder="🔍 Buscar por ID, nombre o email…" autocomplete="off" />
+      <button id="btn-search-customers" class="btn primary">Buscar</button>
+    </div>
+    <div class="form">
+      <label>Nombre<input id="c-name" placeholder="Ej. Ana Torres" /></label>
+      <label>Email<input id="c-email" type="email" placeholder="ana@correo.com" /></label>
+      <button id="btn-create-customer" class="btn primary">+ Crear cliente</button>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>ID</th><th>Nombre</th><th>Email</th></tr></thead>
+      <tbody id="tb-customers"></tbody>
+    </table></div>
+  </section>
+
+  <section id="tab-pedidos" class="tab card panel" hidden>
+    <div class="panel-head">
+      <h3>Pedidos</h3>
+      <button id="btn-reload-orders" class="btn small ghost">↻ Recargar</button>
+    </div>
+    <div class="search-row">
+      <input id="q-orders" class="search" placeholder="🔍 Buscar por ID, cliente o estado…" autocomplete="off" />
+      <button id="btn-search-orders" class="btn primary">Buscar</button>
+    </div>
+    <div class="form">
+      <label>ID cliente<input id="o-customer" type="number" min="1" placeholder="Ej. 1" /></label>
+      <label>ID producto<input id="o-product" type="number" min="1" placeholder="Ej. 2" /></label>
+      <label>Cantidad<input id="o-qty" type="number" min="1" value="1" /></label>
+      <label>Precio unit.<input id="o-price" type="number" step="0.01" min="0" placeholder="0.00" /></label>
+      <button id="btn-create-order" class="btn primary">+ Crear pedido</button>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>ID</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead>
+      <tbody id="tb-orders"></tbody>
+    </table></div>
+  </section>
+
+  <section id="tab-auditoria" class="tab card panel" hidden>
+    <div class="panel-head">
+      <h3>Auditoría · logs de la página</h3>
+      <button id="btn-reload-audit" class="btn small ghost">↻ Recargar</button>
+    </div>
+    <div class="form">
+      <label>Usuario<input id="f-audit-user" placeholder="Ej. admin" autocomplete="off" /></label>
+      <label>Acción<select id="f-audit-action">
+        <option value="">Todas</option>
+        <option value="login">login</option>
+        <option value="page_view">page_view</option>
+        <option value="list_products">list_products</option>
+        <option value="list_orders">list_orders</option>
+        <option value="list_customers">list_customers</option>
+        <option value="list_audit">list_audit</option>
+        <option value="create_product">create_product</option>
+        <option value="create_customer">create_customer</option>
+        <option value="create_order">create_order</option>
+        <option value="health_check">health_check</option>
+      </select></label>
+      <label>Mostrar<select id="f-audit-limit">
+        <option>25</option>
+        <option selected>50</option>
+        <option>100</option>
+        <option>200</option>
+      </select></label>
+      <button id="btn-search-audit" class="btn primary">Buscar</button>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Fecha</th><th>Usuario</th><th>Acción</th><th>Ruta</th></tr></thead>
+      <tbody id="tb-audit"></tbody>
+    </table></div>
+  </section>
+
+  <section class="card panel" id="panel-salud">
+    <div class="panel-head"><h3>Salud de los servicios</h3></div>
+    <pre id="health-out">Pulsa «Salud del sistema» para ver el estado de los microservicios.</pre>
+  </section>
 </main>
-<script src="config.js"></script>
-<script src="app.js"></script>
+
+<footer class="foot">NovaStore · Kong + Microservicios + Grafana — usa <code>http://127.0.0.1:8080</code></footer>
+
+<script src="config.js?v=2"></script>
+<script src="app.js?v=2"></script>
 </body>
 </html>
